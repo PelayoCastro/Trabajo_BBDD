@@ -1,0 +1,270 @@
+CREATE TABLE Entidad_Reguladora (
+ Cod_Entidad VARCHAR2(20) CONSTRAINT pk_Entidad_Reguladora PRIMARY KEY,
+ Nombre VARCHAR2(20) NOT NULL,
+ Estandares VARCHAR2(100) NOT NULL,
+ Productores VARCHAR2(20) NOT NULL,
+ Fecha_membresia DATE NOT NULL
+);
+CREATE TABLE Gestor (
+ NIF VARCHAR2(8) CONSTRAINT pk_Gestor PRIMARY KEY,
+ Nombre VARCHAR2(20) NOT NULL,
+ Cumpleanios DATE NOT NULL,
+ Fecha_admision_responsable DATE NOT NULL,
+ Edad NUMBER(4) NOT NULL,
+ Titulacion VARCHAR2(50) NOT NULL,
+ Telefono_urgencia VARCHAR2(12) NOT NULL
+);
+CREATE TABLE Productos_Veterinarios (
+ Cod_Medicamentos VARCHAR2(200) CONSTRAINT pk_Productos_Veterinarios 
+PRIMARY KEY,
+ Cod_Fabricante VARCHAR2(200) NOT NULL,
+ Fecha_aplicacion_del_producto DATE NOT NULL,
+ Fecha_caducidad DATE NOT NULL,
+ NIF_Responsable VARCHAR2(8) NOT NULL,
+ CONSTRAINT fk_Productos_Veterinarios_Gestor FOREIGN KEY (NIF_Responsable) 
+REFERENCES Gestor(NIF)
+);
+CREATE TABLE Tipo_de_alimentacion (
+ Cod_alimento VARCHAR2(200) CONSTRAINT pk_Tipo_de_alimentacion PRIMARY 
+KEY NOT NULL
+);
+CREATE TABLE Pienso (
+ Codigo_del_lote VARCHAR2(200) CONSTRAINT uk_Pienso UNIQUE NOT NULL,
+ Codigo_del_fabricante VARCHAR2(200) NOT NULL,
+ Cod_alimento VARCHAR2(200) NOT NULL,
+ CONSTRAINT fk_Pienso_Tipo_de_alimentacion FOREIGN KEY (Cod_alimento) 
+REFERENCES Tipo_de_alimentacion(Cod_alimento)
+);
+CREATE TABLE Comprador (
+ NIF VARCHAR2(8) CONSTRAINT pk_Comprador PRIMARY KEY,
+ Telefono_normal VARCHAR2(12) NOT NULL,
+ Direccion VARCHAR2(200) NOT NULL,
+ Web VARCHAR2(200) NOT NULL,
+ Correo VARCHAR2(200) NOT NULL,
+ Telefono_urgencia VARCHAR2(12) NOT NULL
+);
+CREATE TABLE Intermediario (
+ Denominacion VARCHAR2(200),
+ CATM VARCHAR2(200),
+ CATA VARCHAR2(200),
+ Fecha_validez_CATM DATE,
+ Fecha_validez_CATA DATE,
+ NIF_responsable VARCHAR2(8) CONSTRAINT uk_Intermediario_NIF_responsable 
+UNIQUE NOT NULL,
+ NIF VARCHAR2(8) CONSTRAINT pk_Intermediario PRIMARY KEY NOT NULL,
+ CONSTRAINT fk_Intermediario_Comprador FOREIGN KEY (NIF) REFERENCES 
+Comprador(NIF)
+);
+CREATE TABLE Envase (
+ Codigo_envase VARCHAR2(200) CONSTRAINT pk_Envase PRIMARY KEY NOT NULL,
+ NIF_fabricante VARCHAR2(8),
+ Factor_de_resistencia_a_acidos VARCHAR2(200),
+ Opacidad_al_paso_de_la_luz VARCHAR2(200),
+ Tipo_de_reciclaje VARCHAR2(200),
+ CONSTRAINT fk_Envase_Intermediario FOREIGN KEY (NIF_fabricante) REFERENCES 
+Intermediario(NIF)
+);
+CREATE TABLE Fertilizante (
+ Codigo_fertilizante VARCHAR2(200) CONSTRAINT pk_Fertilizante PRIMARY KEY NOT 
+NULL,
+ Denominacion VARCHAR2(200),
+ Fabricante VARCHAR2(200),
+ Cantidad_diaria VARCHAR2(200),
+ Media_semanal NUMBER(200),
+ Media_mensual NUMBER(200),
+ NIF_responsable VARCHAR2(8) NOT NULL,
+ CONSTRAINT fk_Fertilizante_Intermediario FOREIGN KEY (NIF_responsable) 
+REFERENCES Intermediario(NIF)
+);
+CREATE TABLE Quimico (
+ Codigo VARCHAR2(200) CONSTRAINT pk_Quimico PRIMARY KEY NOT NULL,
+ Cantidad VARCHAR2(200) NOT NULL
+);
+CREATE TABLE Destinatario (
+ Cod_destinatario VARCHAR2(200) CONSTRAINT uk_Destinatario UNIQUE NOT NULL,
+ NIF VARCHAR2(8) CONSTRAINT pk_Destinatario PRIMARY KEY NOT NULL,
+ CONSTRAINT fk_Destinatario_Comprador FOREIGN KEY (NIF) REFERENCES 
+Comprador(NIF)
+);
+CREATE TABLE Pasto (
+ Cod_alimento VARCHAR2(200) CONSTRAINT pk_Pasto PRIMARY KEY NOT NULL,
+ CONSTRAINT fk_Pasto_Tipo_de_alimentacion FOREIGN KEY (Cod_alimento) 
+REFERENCES Tipo_de_alimentacion(Cod_alimento)
+);
+CREATE TABLE Cereales (
+ Cod_alimento VARCHAR2(200) CONSTRAINT pk_Cereales PRIMARY KEY NOT NULL,
+ CONSTRAINT fk_Cereales_Tipo_de_alimentacion FOREIGN KEY (Cod_alimento) 
+REFERENCES Tipo_de_alimentacion(Cod_alimento)
+);
+CREATE TABLE Productor (
+ NIF VARCHAR2(8) CONSTRAINT pk_Productor PRIMARY KEY NOT NULL,
+ Nombre VARCHAR2(20) NOT NULL,
+ Direccion VARCHAR2(200) NOT NULL,
+ Website VARCHAR2(200) NOT NULL,
+ Email VARCHAR2(200) NOT NULL,
+ Telefono VARCHAR2(200) NOT NULL,
+ Telefono_de_emergencia VARCHAR2(14) NOT NULL,
+ Tipo_Sociedad VARCHAR2(200) NOT NULL,
+ Cantidad_facturada_mensual NUMBER(200) NOT NULL,
+ Cantidad_facturada_semanal NUMBER(200) NOT NULL,
+ Cantidad_facturada_anual NUMBER(200) NOT NULL,
+ Codigo_registro VARCHAR2(200),
+ Actividades_alimentarias VARCHAR2(200) NOT NULL,
+ Fecha_autorizacion DATE NOT NULL,
+ Fecha_validez_autorizacion DATE NOT NULL,
+ CONSTRAINT fk_Productor_Gestor FOREIGN KEY (NIF) REFERENCES Gestor(NIF)
+);
+CREATE TABLE Sociedad (
+ Cod_sociedad VARCHAR2(200) CONSTRAINT uk_Sociedad UNIQUE NOT NULL,
+ NIF VARCHAR2(8) CONSTRAINT pk_Sociedad PRIMARY KEY NOT NULL,
+ CONSTRAINT fk_Sociedad_Productor FOREIGN KEY (NIF) REFERENCES Productor(NIF)
+);
+CREATE TABLE Autonomo (
+ Cod_autonomo VARCHAR2(200) CONSTRAINT uk_Autonomo UNIQUE NOT NULL,
+ NIF VARCHAR2(8) CONSTRAINT pk_Autonomo PRIMARY KEY NOT NULL,
+ CONSTRAINT fk_Autonomo_Productor FOREIGN KEY (NIF) REFERENCES 
+Productor(NIF)
+);
+CREATE TABLE Granja (
+ Coordenadas_GPS VARCHAR2(200) CONSTRAINT pk_Granja PRIMARY KEY NOT 
+NULL,
+ Direccion VARCHAR2(200) NOT NULL,
+ NIF_titular VARCHAR2(8) NOT NULL,
+ Cod_alimento VARCHAR2(200),
+ CONSTRAINT fk_Granja_Tipo_de_alimentacion FOREIGN KEY (Cod_alimento) 
+REFERENCES Tipo_de_alimentacion(Cod_alimento)
+);
+CREATE TABLE Pertenecer (
+ NIF VARCHAR2(8) NOT NULL,
+ Cod_Entidad VARCHAR2(200) NOT NULL,
+ CONSTRAINT pk_Pertenecer PRIMARY KEY (NIF, Cod_Entidad),
+ CONSTRAINT fk_Pertenecer_Productor FOREIGN KEY (NIF) REFERENCES 
+Productor(NIF),
+ CONSTRAINT fk_Pertenecer_Entidad_Reguladora FOREIGN KEY (Cod_Entidad) 
+REFERENCES Entidad_Reguladora(Cod_Entidad)
+);
+CREATE TABLE Aplica (
+ Coordenadas_GPS VARCHAR2(200) NOT NULL,
+ Cod_Medicamentos VARCHAR2(200) NOT NULL,
+ CONSTRAINT pk_Aplica PRIMARY KEY (Coordenadas_GPS, Cod_Medicamentos),
+ CONSTRAINT fk_Aplica_Granja FOREIGN KEY (Coordenadas_GPS) REFERENCES 
+Granja(Coordenadas_GPS),
+ CONSTRAINT fk_Aplica_Productos_Veterinarios FOREIGN KEY (Cod_Medicamentos) 
+REFERENCES Productos_Veterinarios(Cod_Medicamentos)
+);
+CREATE TABLE Producto (
+ Cod_Prod VARCHAR2(200) CONSTRAINT pk_Producto PRIMARY KEY NOT NULL,
+ Cod_Registro_Sanitario VARCHAR2(200),
+ Fecha_Validacion_Registro DATE NOT NULL,
+ Nombre VARCHAR2(200) NOT NULL,
+ Descripcion VARCHAR2(200) NOT NULL,
+ Etiqueta INT NOT NULL,
+ Codigo_alerta_CA VARCHAR2(200),
+ Fecha_activacion_CA DATE NOT NULL,
+ Fecha_desactivacion_CA DATE NOT NULL,
+ NIF VARCHAR2(8) NOT NULL,
+ CONSTRAINT fk_Producto_Productor FOREIGN KEY (NIF) REFERENCES Productor(NIF)
+);
+CREATE TABLE Aceite (
+ Acidez VARCHAR2(200),
+ Riego_diario VARCHAR2(200),
+ Riego_medio_semanal VARCHAR2(200),
+ Riego_medio_mensual VARCHAR2(200),
+ GPS_finca_cultivo VARCHAR2(200),
+ Cod_aceite VARCHAR2(200) CONSTRAINT pk_Aceite PRIMARY KEY NOT NULL,
+ Cod_Prod VARCHAR2(200),
+ CONSTRAINT fk_Aceite_Producto FOREIGN KEY (Cod_Prod) REFERENCES 
+Producto(Cod_Prod)
+);
+CREATE TABLE Lacteo (
+ Temperatura_Mantenimiento VARCHAR2(200),
+ Fecha_Caducidad DATE,
+ Cod_lacteo VARCHAR2(200) CONSTRAINT pk_Lacteo UNIQUE NOT NULL,
+ Cod_Prod INT NOT NULL,
+ Coordenadas_GPS VARCHAR2(200),
+ PRIMARY KEY (Cod_Prod),
+ CONSTRAINT fk_Lacteo_Producto FOREIGN KEY (Cod_Prod) REFERENCES 
+Producto(Cod_Prod),
+ CONSTRAINT fk_Lacteo_Granja FOREIGN KEY (Coordenadas_GPS) REFERENCES 
+Granja(Coordenadas_GPS)
+);
+CREATE TABLE Vino (
+ Graduacion VARCHAR2(200),
+ Tipo VARCHAR2(200),
+ Riego_diario VARCHAR2(200),
+ Riego_medio_semanal VARCHAR2(200),
+ Riego_medio_mensual VARCHAR2(200),
+ GPS_finca_cultivo VARCHAR2(200),
+ Cod_Vino VARCHAR2(200) CONSTRAINT pk_Vino UNIQUE NOT NULL,
+ Cod_Prod VARCHAR2(200),
+ PRIMARY KEY (Cod_Prod),
+ CONSTRAINT fk_Vino_Producto FOREIGN KEY (Cod_Prod) REFERENCES 
+Producto(Cod_Prod)
+);
+CREATE TABLE Instalaciones (
+ Coordenadas_GPS VARCHAR2(200) CONSTRAINT pk_Instalaciones PRIMARY KEY 
+NOT NULL,
+ Direccion VARCHAR2(200) NOT NULL,
+ NIF_titular VARCHAR2(8) NOT NULL,
+ Tlf_urgencias VARCHAR2(14),
+ Mail VARCHAR2(200) NOT NULL,
+ Codigo_registro_sanitario VARCHAR2(200),
+ Fecha_validez_registro DATE NOT NULL,
+ Cantidad_procesada_diaria VARCHAR2(200) NOT NULL,
+ Media_cantidad_mensual VARCHAR2(200) NOT NULL,
+ Media_cantidad_anual VARCHAR2(200) NOT NULL,
+ Fecha_salida_producto DATE NOT NULL,
+ Empresa_logistica VARCHAR2(200),
+ Destinatario VARCHAR2(200) NOT NULL,
+ Cod_Prod VARCHAR2(200),
+ Codigo_envase VARCHAR2(200),
+ CONSTRAINT fk_Instalaciones_Producto FOREIGN KEY (Cod_Prod) REFERENCES 
+Producto(Cod_Prod),
+ CONSTRAINT fk_Instalaciones_Envase FOREIGN KEY (Codigo_envase) REFERENCES 
+Envase(Codigo_envase)
+);
+CREATE TABLE Supervisar (
+ Cod_Prod VARCHAR2(200),
+ Cod_Entidad VARCHAR2(200),
+ PRIMARY KEY (Cod_Prod, Cod_Entidad),
+ CONSTRAINT fk_Supervisar_Producto FOREIGN KEY (Cod_Prod) REFERENCES 
+Producto(Cod_Prod),
+ CONSTRAINT fk_Supervisar_Entidad_Reguladora FOREIGN KEY (Cod_Entidad) 
+REFERENCES Entidad_Reguladora(Cod_Entidad)
+);
+CREATE TABLE Comprar (
+ Cod_Prod VARCHAR2(200),
+ NIF VARCHAR2(8),
+ PRIMARY KEY (Cod_Prod, NIF),
+ CONSTRAINT fk_Comprar_Producto FOREIGN KEY (Cod_Prod) REFERENCES 
+Producto(Cod_Prod),
+ CONSTRAINT fk_Comprar_Comprador FOREIGN KEY (NIF) REFERENCES 
+Comprador(NIF)
+);
+CREATE TABLE Utilizar_Fertilizante (
+ Cod_Prod VARCHAR2(200),
+ Codigo_Fertilizante VARCHAR2(200),
+ PRIMARY KEY (Cod_Prod, Codigo_Fertilizante),
+ CONSTRAINT fk_Utilizar_Fertilizante_Aceite FOREIGN KEY (Cod_Prod) REFERENCES 
+Aceite(Cod_Prod),
+ CONSTRAINT fk_Utilizar_Fertilizante_Fertilizante FOREIGN KEY (Codigo_Fertilizante) 
+REFERENCES Fertilizante(Codigo_Fertilizante)
+);
+CREATE TABLE Utilizar_Vino (
+ Cod_Prod VARCHAR2(200),
+ Cod_Vino VARCHAR2(200),
+ PRIMARY KEY (Cod_Prod, Cod_Vino),
+ CONSTRAINT fk_Utilizar_Vino_Producto FOREIGN KEY (Cod_Prod) REFERENCES 
+Producto(Cod_Prod),
+ CONSTRAINT fk_Utilizar_Vino_Vino FOREIGN KEY (Cod_Vino) REFERENCES 
+Vino(Cod_Vino)
+);
+CREATE TABLE Utilizar_Instalaciones_Quimico (
+ Coordenadas_GPS VARCHAR2(200),
+ Codigo VARCHAR2(200),
+ PRIMARY KEY (Coordenadas_GPS, Codigo),
+ CONSTRAINT fk_Utilizar_Instalaciones_Quimico_Instalaciones FOREIGN KEY 
+(Coordenadas_GPS) REFERENCES Instalaciones(Coordenadas_GPS),
+ CONSTRAINT fk_Utilizar_Instalaciones_Quimico_Quimico FOREIGN KEY (Codigo) 
+REFERENCES Quimico(Codigo)
+);
